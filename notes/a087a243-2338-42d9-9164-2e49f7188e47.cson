@@ -1,5 +1,5 @@
 createdAt: "2019-01-01T00:56:29.046Z"
-updatedAt: "2019-01-01T01:09:57.045Z"
+updatedAt: "2019-01-01T01:16:49.251Z"
 type: "MARKDOWN_NOTE"
 folder: "1657339d11d28445c69b"
 title: "带版本控制和同步功能的笔记系统"
@@ -63,9 +63,13 @@ content: '''
   
   首先在这个git项目下建立一个文件夹.ImageStorage.把图片放进去
   文档插入图片地址修改一下
-  比如本地的地址为:C:\\E_Disk\\gitrepo\\NoteSystem\\ImageStorage\\ExampleIMG.jpg
+  比如本地的地址为:
+  {C:\\E_Disk\\gitrepo\\]NoteSystem}mageStorage\\ExampleIMG.jpg
   文档里插入远程的地址为
-  !\\[实例图片地址]()
+  {https://raw.githubusercontent.com/adensW/}NoteSystem/master/ImageStorage/ExampleIMG.jpg
+  
+  对比一下就是将本地GIt项目地址之前的的路径(上文{}里面的地址)换成github的地址
+  ![ExampleIMG.jpg](https://raw.githubusercontent.com/adensW/NoteSystem/master/ImageStorage/ExampleIMG.jpg)
   
   
 '''
