@@ -1,5 +1,5 @@
 createdAt: "2019-01-01T00:56:29.046Z"
-updatedAt: "2019-01-01T01:16:49.251Z"
+updatedAt: "2019-01-01T07:43:23.781Z"
 type: "MARKDOWN_NOTE"
 folder: "1657339d11d28445c69b"
 title: "带版本控制和同步功能的笔记系统"
@@ -22,7 +22,8 @@ content: '''
   
   ## 3 使用Bat脚本自动push和pull
   新建一个bat文件放到git工作目录下面
-  ```
+  
+  ``` 
   @echo off
   @echo '开始同步...'
   cd C:\\E_Disk\\gitrepo\\NoteSystem
@@ -51,12 +52,21 @@ content: '''
   5.条件和设置里可以选择当电脑空闲,以及在某些网络下面运行任务.可忽略不考虑.
   
   以上所有的步骤就ok了.现在可以使用BoostNote写笔记.等待计划任务执行bat脚本.执行完就同步以及更新了所有的笔记.还有了版本管理的功能.这个功能基本上就是使用git来操作了.
+  ### 4.1 隐藏 运行bat脚本的Dos窗口
+  
+  使用vbs脚本运行bat脚本.
+  1.新建vbs结尾的文件.输入代码
+  ```
+  Set ws = CreateObject("Wscript.Shell") 
+  ws.run "cmd /c AutoAsyncMission.bat" ,vbhide
+  ```
+  放到同步脚本同一文件下.
+  将计划任务改为运行这个脚本.就ok了
   
   ## 5 被忽略的问题
   
   1.更新的时候可能会出现合并冲突.需要手动解决.
   2.我本地的github key是没有密码的.如果生成ssh key 的时候有密码,每次更新就需要输入密码.
-  3.git本身所需要的操作未做详细说明.例如需要将本地的ssh key 导入到github的信任名单里.才能直接进行Pull/Push操作.
   
   ## 6 扩展
   图片仓库.经常的需要导入一些图片在我们的笔记中.就需要一个图床.现在可以直接使用git.
@@ -64,14 +74,12 @@ content: '''
   首先在这个git项目下建立一个文件夹.ImageStorage.把图片放进去
   文档插入图片地址修改一下
   比如本地的地址为:
-  {C:\\E_Disk\\gitrepo\\]NoteSystem}mageStorage\\ExampleIMG.jpg
+  {C:\\E_Disk\\gitrepo\\NoteSystem}mageStorage\\ExampleIMG.jpg
   文档里插入远程的地址为
-  {https://raw.githubusercontent.com/adensW/}NoteSystem/master/ImageStorage/ExampleIMG.jpg
+  {https://raw.githubusercontent.com/adensW/NoteSystem/master/}ImageStorage/ExampleIMG.jpg
   
-  对比一下就是将本地GIt项目地址之前的的路径(上文{}里面的地址)换成github的地址
+  对比一下就是将本地GIt项目地址之前的的路径(上文{}里面的地址)换成github查看原始数据的地址
   ![ExampleIMG.jpg](https://raw.githubusercontent.com/adensW/NoteSystem/master/ImageStorage/ExampleIMG.jpg)
-  
-  
 '''
 isStarred: false
 isTrashed: false
