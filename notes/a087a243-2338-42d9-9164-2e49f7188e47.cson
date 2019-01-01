@@ -1,5 +1,5 @@
 createdAt: "2019-01-01T00:56:29.046Z"
-updatedAt: "2019-01-01T00:57:01.956Z"
+updatedAt: "2019-01-01T00:59:24.377Z"
 type: "MARKDOWN_NOTE"
 folder: "1657339d11d28445c69b"
 title: "带版本控制和同步功能的笔记系统"
@@ -56,6 +56,7 @@ content: '''
   
   1.更新的时候可能会出现合并冲突.需要手动解决.
   2.我本地的github key是没有密码的.如果生成ssh key 的时候有密码,每次更新就需要输入密码.
+  3.git本身所需要的操作未做详细说明.例如需要将本地的ssh key 导入到github的信任名单里.才能直接进行Pull/Push操作.
   
 '''
 isStarred: false
