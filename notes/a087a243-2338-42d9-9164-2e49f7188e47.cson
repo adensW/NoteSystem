@@ -1,5 +1,5 @@
 createdAt: "2019-01-01T00:56:29.046Z"
-updatedAt: "2019-01-01T00:59:24.377Z"
+updatedAt: "2019-01-01T01:09:57.045Z"
 type: "MARKDOWN_NOTE"
 folder: "1657339d11d28445c69b"
 title: "带版本控制和同步功能的笔记系统"
@@ -57,6 +57,16 @@ content: '''
   1.更新的时候可能会出现合并冲突.需要手动解决.
   2.我本地的github key是没有密码的.如果生成ssh key 的时候有密码,每次更新就需要输入密码.
   3.git本身所需要的操作未做详细说明.例如需要将本地的ssh key 导入到github的信任名单里.才能直接进行Pull/Push操作.
+  
+  ## 6 扩展
+  图片仓库.经常的需要导入一些图片在我们的笔记中.就需要一个图床.现在可以直接使用git.
+  
+  首先在这个git项目下建立一个文件夹.ImageStorage.把图片放进去
+  文档插入图片地址修改一下
+  比如本地的地址为:C:\\E_Disk\\gitrepo\\NoteSystem\\ImageStorage\\ExampleIMG.jpg
+  文档里插入远程的地址为
+  !\\[实例图片地址]()
+  
   
 '''
 isStarred: false
