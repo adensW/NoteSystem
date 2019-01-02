@@ -1,0 +1,138 @@
+createdAt: "2019-01-02T07:01:09.399Z"
+updatedAt: "2019-01-02T07:01:39.042Z"
+type: "MARKDOWN_NOTE"
+folder: "1657339d11d28445c69b"
+title: "使用BoostNote 发布博客 副本"
+content: '''
+  # 使用BoostNote 发布博客
+  
+  
+  
+  ## 1.BoostNote设置
+  
+  设置里面有博客选项,打开后填写自己的博客发布地址和登陆方式
+  本地测试填写的使用地址*https:\\\\localhost:44383\\api\\values* ,登陆方式未填写.(测试不使用验证登陆等功能). 
+  
+  ## 2.发布
+  使用BoostNote写完博客之后.
+  在博客页面点击发布就可以了,如果已经发布的,可以点更新.完美的操作流程.
+  
+  ## 3.解决方案
+  
+  个人的博客是自己手写的,从页面到后台逻辑,所以想要完成这个流程是需要自己改一改代码的!!
+  
+  ### 3.1 基础数据
+  首先要知道BoostNote 发布所构建的 数据格式,
+    使用Fiddle 抓包工具,抓取发布的地址数据.打开fiddle 找到 **1** 里填写的地址,查看后得知
+    1.发布的完整地址 *https:\\\\localhost:44383\\api\\blog\\wp\\v2\\posts*. (由于BoostNote是默认发布WordPress站点,所以带上了*wp\\v2\\posts*这样字段,并不是设置里面的*https:\\\\localhost:44383\\api\\blog* .[1]()  ) 
+    2.发布的json格式 
+    ```
+    {
+        "title":"title",
+        "content":"博客内容",
+        "status":"publish"
+    }
+    ```
+  3.发布使用的是Post提交,更新是使用Put提交(基本上是按照RESTful形式的API设计,所以很容易理解)
+  
+  4.Auth方式([OAuth2.0的标准]())
+  
+  ### 3.2 构建接受API和数据结构
+  
+  BoostNoteModel.cs
+  
+  ```
+  \\\\ BoostNoteModel.cs
+  public class BoostNoteModel
+      {
+          public string title { get; set; }
+          public string content { get; set; }
+          public string status { get; set; }
+      }
+  ```
+  
+  ValueController.cs 里面 写上 post 方法
+  
+  ```
+  \\\\ ValueController.cs 
+          [HttpPost("wp\\v2\\posts")] 
+          public IActionResult Post(BoostNoteModel blog)
+          {
+              \\\\保存代码
+              return Ok("success");
+          }
+  ```
+  这一步做完测试一下.会发现发布失败.
+  如果在代码里加断点调试就会发现,程序运行了Post方法,并且已经获得了发布的数据.后续也没有报错.但就是发布失败.
+  这就说明是返回值不对.毕竟BoostNote发布之后要接收到正确的返回值才能确认是否真的发布成功.
+  首先想到的是返回的是OK即200.但是严格按照RESTful风格编码create应该返回201.在ASP.Net Core 对应
+  ```
+  return Created("success");
+  ```
+  测试仍然出错.不是错在返回状态码.而是应该返回其他的数据.幸好BoostNote是开源的.在github阅读源码之后发现,BoostNote返回接受两个参数**id** 和**link** [2](https:\\\\github.com\\BoostIO\\Boostnote\\blob\\master\\browser\\main\\NoteList\\index.js)
+  构建返回Model
+  
+  ```
+  \\\\ BoostNoteModel_Result.cs
+   public class BoostNoteModel_Result
+      {
+         public string link { get; set; }
+         public string id { get; set; }
+      }
+  ```
+  修改controller里面的Post方法
+  
+  ```
+          \\\\ ValueController.cs
+          [HttpPost("wp\\v2\\posts")] 
+          public IActionResult Post(BoostNoteModel blog)
+          {
+              \\\\保存代码
+              BoostNoteModel_Result result = new BoostNoteModel_Result(){
+                id =  "1",\\\\保存代码执行后返回的博客ID.后面更新博客会用到
+                link ="https:\\\\localhost:44383\\api\\values\\1"\\\\博客查看地址(在BoostNote里点击查看博客会跳转到这个链接)
+              }
+              return Ok(result);
+          }
+  ```
+  再次测试OK.完美通过.
+  ### 3.3 更新博客
+  在初次上传成功后BoostNote会保存这个博客的ID,用来更新博客.
+  同样抓包检查更新的数据格式和更新地址
+  1.数据格式没变,同样的是
+  ```
+    {
+        "title":"title",
+        "content":"博客内容",
+        "status":"publish"
+    }
+    ```
+    值得注意的是.BoostNote的第一行会被当成Title,不会出现在content里面.虽然是写在一起的.
+  2.更新地址
+    Put方式提交:*http:\\\\localhost:44383\\api\\blog\\wp\\v2\\posts\\1*
+    可以看出最后多了一个"*\\1*"这就是发布返回的博客id
+  
+  写controller的更新方法
+  
+  ```
+  \\\\ValueControoler.cs
+        [HttpPut("wp\\v2\\posts\\{id}")]
+          public IActionResult Put(string id, API_Note_Blog blog)
+          {
+            \\\\ 更新方法
+              BoostNoteModel_Result result = new BoostNoteModel_Result(){
+                id =  "1",\\\\更新代码执行后返回的博客ID
+                link ="https:\\\\localhost:44383\\api\\values\\1"\\\\博客查看地址
+              }
+              return Ok(result);
+          }
+  ```
+  大体上和post方法一样只是修改了Api地址加上{\\id}
+  到这里流程结束了.这样就可以边写博客边发布了.
+  后面需要做验证之类的参考其他文章.BoostNote里最简单就是使用User方式填写自己的登陆账号和密码.JWT就填写自己登陆时所用到的JWT.但是一般无法直接获取.本站是个人全部手写完成,所以想要什么自己添加就可以了,倒是比较简单的会获取到JWT了.以后有机会写一下这方面的文章
+  这就有点困难了.我那知道真的WordPress会返回什么?
+  
+'''
+tags: []
+isStarred: false
+isTrashed: false
