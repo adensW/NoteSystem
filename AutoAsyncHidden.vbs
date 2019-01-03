@@ -1,2 +1,5 @@
-Set ws = CreateObject("Wscript.Shell") 
-ws.run "cmd /c AutoAsync.bat" ,vbhide
+Set ws = CreateObject("Wscript.Shell")
+dim batpath 
+w=ws.CurrentDirectory
+batpath = "cmd /c"+w+"\AutoAsync.bat"
+ws.run batpath 
