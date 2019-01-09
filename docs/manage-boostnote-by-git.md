@@ -56,6 +56,13 @@ ws.run "cmd /c AutoAsyncMission.bat" ,vbhide
 放到同步脚本同一文件下.
 将计划任务改为运行这个脚本.就ok了
 
+更新: 计划任务执行这个脚本路径为~\system32> 导致到不到AutoAsyncMission.bat脚本.即不运行bat脚本.同时在计划任务里也显示已运行.需要提供完整的bat脚本路径
+```
+Set ws = CreateObject("Wscript.Shell") 
+ws.run "cmd /c C:\E_Disk\gitrepo\NoteSystem\AutoAsyncMission.bat" ,vbhide
+```
+注意一下bat脚本之前就是先运行了 ``` cd C:\E_Disk\gitrepo\NoteSystem ``` 进入git文件夹下.
+
 ## 5 被忽略的问题
 
 1.更新的时候可能会出现合并冲突.需要手动解决.
