@@ -1,0 +1,64 @@
+createdAt: "2019-02-18T01:59:02.678Z"
+updatedAt: "2019-02-20T07:09:35.505Z"
+type: "MARKDOWN_NOTE"
+folder: "1657339d11d28445c69b"
+title: "Docker 的基本使用"
+tags: [
+  "Docker"
+]
+content: '''
+  # Docker 的基本使用
+  
+  ## 1.安装Docker
+  
+  ### 1.1 Windows 安装
+  
+  Windows pro 可以直接下载安装Docker Desktop,其他版本通过使用Docker Toolbox安装使用 [下载Docker ToolBox for windows](https:\\\\download.docker.com\\win\\stable\\DockerToolbox.exe)
+  本文所用个人电脑是家庭版的win10,所以使用Docker Toolbox 安装
+  
+  安装Toolbox完成后点击 Docker Quickstart Terminal 进行初始化
+  
+  这里会遇到一些问题
+  
+  问题1. 无法打开进行初始化.这个快捷方式是使用git bash 执行 ``` start.sh ``` Docker的初始化脚本.
+  
+    错误原因可能是
+      1. 没有安装git.在安装toolbox的时候一般会默认选中安装git,但是被取消掉了,导致未安装.重新安装git即可.
+      2. git的安装位置不是默认地址.我安装git在其他的盘,但是 Docker Quickstart Terminal 仍使用默认的c盘地址.导致失败.解决办法是修改启动路径.右键Docker Quickstart Terminal  图标 ->属性 .在快捷方式->目标里写上正确的地址.例如``` E:\\software\\Git\\bin\\bash.exe --login -i "E:\\software\\Docker Toolbox\\start.sh" ```
+  
+  问题2. 能打开无法完成初始化,报错显示翻译过来就是 bios 未启动 虚拟化选项,这个需要进bios启动这个选项就可以了
+  
+  问题3. 由于某些原因导致无法下载 ``` boot2docker.iso ``` ,可以手动复制下载地址,自己想办法下载后放到 
+  C:\\Users\\{username}\\.docker\\machine\\cache 重新执行就ok了
+  
+  ### 1.2 Linux 安装
+  CentOS 7 安装
+  最新版本的Docker 支持 CentOS7 及以上,CentOS 6.5 已经不在支持了
+  根据官方文档基本上是一遍过的[安装文档](https:\\\\docs.docker.com\\install\\linux\\docker-ce\\centos\\)
+  
+  ## 2.基本操作
+  
+  ### 2.1 拉取
+  
+  ### 2.2 构建
+  
+  #### 2.2.1 .dockerfile
+  
+  #### 2.2.2 .dockerignore
+  
+  ### 2.3 推送
+  
+  ### 2.4 运行
+  
+  ### 2.5 停止
+  
+  ### 2.6 其他
+  
+  
+  ## 3.自建registry
+  
+  ## 4.Nginx
+'''
+linesHighlighted: []
+isStarred: false
+isTrashed: false
