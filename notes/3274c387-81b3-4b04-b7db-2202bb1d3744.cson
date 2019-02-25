@@ -1,0 +1,208 @@
+createdAt: "2019-02-25T02:37:04.857Z"
+updatedAt: "2019-02-25T02:37:15.735Z"
+type: "MARKDOWN_NOTE"
+folder: "1657339d11d28445c69b"
+title: "通过IISNode 在Windows 上运行 NodeJS项目 副本"
+content: '''
+  # 通过IISNode 在Windows 上运行 NodeJS项目
+  a-summary
+  
+  在 windows server 2012 上使用IISNode,部署NodeJS的项目.本文记录了部署过程以及一些部署遇到的问题.
+  
+  a-summary-end
+  
+  a-catagory NodeJS a-catagory-end
+  
+  ## 前期准备
+  1. 支持的系统Windows Vista, Windows 7, Windows 8, Windows Server 2008, or Windows Server 2012
+  
+  2. IIS 7.x\\8.x 和 IIS管理工具
+  
+  3. IIS URL rewrite 模块,可以使用IIS管理器的web平台安装程序搜索"URL 重写工具\\URL rewrite"下载或者直接下载安装:[URL rewrite Module](https:\\\\www.iis.net\\downloads\\microsoft\\url-rewrite)
+  
+  4. NodeJS 
+  
+  5. IISNode,下载地址:[IISNode x64](https:\\\\github.com\\azure\\iisnode\\releases\\download\\v0.2.21\\iisnode-full-v0.2.21-x64.msi),[IISNode x86](https:\\\\github.com\\azure\\iisnode\\releases\\download\\v0.2.21\\iisnode-full-v0.2.21-x86.msi)
+  
+  7. 值得注意的是如果要部署含有websockets功能,需要IIS 8.x,和Windows 8 or Windows Server 2012以上
+  
+  ## 发布流程
+  前期准备都安装完成之后就可以准备部署了.
+  1. 测试项目就一个 app.js.直接部署,如果是复杂的项目首先安装一下依赖项 ```npm install```
+  2. 在IIS管理工具创建一个网站.物理路径为上传的文件夹地址.传递身份验证这个都需要保证有足够的读写权限访问网站物理路径.
+  3. 创建好网站一般会默认在目录下创建web.config文件,没有的话就自己创建一个.并作以下配置,更多具体的配置可查看:[web.config](https:\\\\github.com\\tjanczuk\\iisnode\\blob\\master\\src\\samples\\configuration\\web.config)
+  web.config配置
+  ```XML
+  <configuration>
+    <system.webServer>
+       <security>
+         <requestFiltering>
+           <hiddenSegments>
+             <add segment="node_modules" \\>
+           <\\hiddenSegments>
+         <\\requestFiltering>
+       <\\security>    
+      <handlers>
+        <add name="iisnode" path="app.js" verb="*" modules="iisnode" \\>
+      <\\handlers>
+      <rewrite>
+        <rules>
+          <rule name="all">
+            <match url="\\*" \\>
+            <action type="Rewrite" url="app.js" \\>
+          <\\rule>
+        <\\rules>
+      <\\rewrite>
+      <defaultDocument>
+              <files>
+                  <add value="app.js" \\>
+              <\\files>
+          <\\defaultDocument>
+    <\\system.webServer>
+  <\\configuration>
+  ```
+  解释一下
+  1. ,默认程序入口是bin目录,在nodejs并不存在,所以要做以下配置,改为node_modules
+  ```XML
+  <security>
+         <requestFiltering>
+           <hiddenSegments>
+             <add segment="node_modules" \\>
+           <\\hiddenSegments>
+         <\\requestFiltering>
+       <\\security>   
+  ```
+  2.配置app.js使用IISNode
+  ```XML
+  <handlers>
+        <add name="iisnode" path="app.js" verb="*" modules="iisnode" \\>
+      <\\handlers>
+  ```
+  3.配置url rewrite,有了这个配置,IIS才能正确的将访问的请求绑定到app.js进行处理.这个是默认匹配全部并且全部交给app.js对传入的请求进行路由分发.还可以进行更复杂的控制,这里就不详细展开.
+  ```XML
+  <rewrite>
+        <rules>
+          <rule name="all">
+            <match url="\\*" \\>
+            <action type="Rewrite" url="app.js" \\>
+          <\\rule>
+        <\\rules>
+      <\\rewrite>
+  ```
+  4.配置默认文档.(非必需).正常情况下所有的请求都会被URL rewrite绑定到app.js,并不经过这里.但是我在实际部署测试的时候,因为配置错误无法获取到默认文档才加上的.随后的测试中,删除也并不影响程序运行.
+  
+  如果是访问root目录下面的文件就需要这个配置了
+  
+  ```XML
+  <defaultDocument>
+              <files>
+                  <add value="app.js" \\>
+              <\\files>
+          <\\defaultDocument>
+  ```
+  以上配置好一切顺利就可以在浏览器查看了.
+  ## 错误处理
+  首先出错了就需要打开debug模式进行调试.在web.config加入以下代码
+  ```XML
+  <iisnode      
+        node_env="%node_env%"
+        nodeProcessCountPerApplication="1"
+        maxConcurrentRequestsPerProcess="1024"
+        maxNamedPipeConnectionRetry="100"
+        namedPipeConnectionRetryDelay="250"      
+        maxNamedPipeConnectionPoolSize="512"
+        maxNamedPipePooledConnectionAge="30000"
+        asyncCompletionThreadCount="0"
+        initialRequestBufferSize="4096"
+        maxRequestBufferSize="65536"
+        watchedFiles="*.js;iisnode.yml"
+        uncFileChangesPollingInterval="5000"      
+        gracefulShutdownTimeout="60000"
+        loggingEnabled="true"
+        logDirectory="iisnode"
+        debuggingEnabled="true"
+        debugHeaderEnabled="false"
+        debuggerPortRange="5058-6058"
+        debuggerPathSegment="debug"
+        maxLogFileSizeInKB="128"
+        maxTotalLogFileSizeInKB="1024"
+        maxLogFiles="20"
+        devErrorsEnabled="true"
+        flushResponse="false"      
+        enableXFF="false"
+        promoteServerVars=""
+        configOverrides="iisnode.yml"
+       \\>
+  ```
+  字段的具体意思在这:[web.config](https:\\\\github.com\\tjanczuk\\iisnode\\blob\\master\\src\\samples\\configuration\\web.config) .
+  这样就可以在iisnode文件夹下看到index.html和一堆log文件了
+  
+  使用浏览器打开index.html,点击某一条log就可以查看具体的log信息了
+  
+  如果是ie浏览器的话需要加载activeX才行,默认是关闭的.只要在打开页面是点击最下方有一个允许阻止的内容就可以了
+  ### 1.404错误,
+  可能原因:
+  1.没有足够的权限.
+  
+  右键网站,点击编辑权限,点击安全选项.创建网站的时候如果是自己指定的用户,那就给这个用户读写权限,如果是应用程序用户,就找到'IIS_IUser\\[xxxxx\\]'类似的用户或者'IUser\\[xxxxxx\\]'类似用户赋予读写权限
+  
+  2.监听的端口错误.
+  
+  使用IIS管理会随机指定一个端口给这个网站,所以如果在app.js里自己指定了具体的端口,会造成访问404.
+  
+  错误代码如下
+  ```JavaScript
+  app.get('\\', function (req, res) {
+      let env = require('.\\config\\doc.js');
+      res.send(env);
+  })
+  var port =  8081;
+  app.listen(port, function () {});
+  ```
+  
+  改为
+  
+  ```JavaScript
+  var port =  process.env.PORT || 8081;
+  app.listen(port, function () {});
+  
+  ```
+  
+  使用process.env.PORT获取IIS分配的端口
+  
+  !注意:如果使用console.log(process.env.PORT)打印端口会得到```.\\pipe\\b2b4cb8c-7564-4408-80f5-3ba5f5809541 ```这样的字段,这个是正常的.这个是iis端口的map映射字段.IIS通过执行管道命令对应到分配的端口.所以这个并不会妨碍监听的端口..
+  
+  3.web.config配置错误
+  配置错误可以查看详细的配置:[web.config](https:\\\\github.com\\tjanczuk\\iisnode\\blob\\master\\src\\samples\\configuration\\web.config)进行修改,一般是rewrite地址错误,比如:文件地址是\\controller\\index.js而web.config为
+  ```XML
+  <rewrite>
+        <rules>
+          <rule name="all">
+            <match url="\\*" \\>
+            <action type="Rewrite" url="index.js" \\>
+          <\\rule>
+        <\\rules>
+      <\\rewrite>
+  ```
+  改为
+  ```
+  <action type="Rewrite" url="controller\\index.js" \\>
+  ```
+  ### 2.1011\\1013错误
+  可能原因:
+  1.程序内部错误,代码有问题,改代码
+  2.consol.log()造成的内存溢出,删除所有的console.log()
+  3.奇妙的情况,本地使用自签名的证书构建https的AJAX请求会有不信任证书的情况.导致程序错误.这是因为NodeJS的https设计不是使用本地的证书管理器进行验证.所以本地信任自签名证书在NodeJS里进行HTTPS的请求都会报错.解决办法参考[stackoverflow](https:\\\\stackoverflow.com\\questions\\10888610\\ignore-invalid-self-signed-ssl-certificate-in-node-js-with-https-request)
+  
+  ## HTTPS问题
+  上述的HTTPS的问题其实并不必须解决.本地使用http.部署https交给IIS进行配置管理就不会有问题了.通过申请一个免费的SSL证书,导入服务器.IIS配置https访问.避免在开发时需要配置https请求.
+  
+  
+  
+  
+  
+'''
+linesHighlighted: []
+tags: []
+isStarred: false
+isTrashed: false
