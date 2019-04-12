@@ -1,0 +1,179 @@
+createdAt: "2019-04-12T06:12:40.588Z"
+updatedAt: "2019-04-12T06:13:36.773Z"
+type: "MARKDOWN_NOTE"
+folder: "1657339d11d28445c69b"
+title: "Nginx 各种配置 副本"
+content: '''
+  # Nginx 各种配置
+  
+  a-summary
+  
+  nginx的基本配置.
+  静态页面访问,文件下载服务器,Basic Auth,https访问配置,反向代理,负载均衡.
+  
+  随便配置,能跑就行.没有技术含量在里面
+  
+  a-summary-end
+  
+  a-catagory Nginx a-catagory-end
+  
+  ## 1.基本配置
+  nginx.conf
+  
+  ```yaml
+  user                  nginx;
+  worker_processes      1;
+  error_log             \\var\\log\\nginx\\error.log warn;
+  pid                   \\var\\run\\nginx.pid;
+  events {
+    worker_connections  1024;
+  }
+  http {
+    include             \\etc\\nginx\\mime.types;
+    default_type        application\\octet-stream;
+    log_format main    '$remote_addr - $remote_user [$time_local] "$request"' 
+  '$status $body_bytes_sent "$http_referer"' '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log          \\var\\log\\nginx\\access.log  main;
+    sendfile            on;
+    #tcp_nopush         on;
+    keepalive_timeout   65;
+    #gzip               on;
+    include             \\etc\\nginx\\conf.d\\*.conf;
+  }
+  ```
+  default.conf
+  ```YAML
+  server {
+    listen              80;
+    server_name         alpha.adens.wang;
+    #charset            koi8-r;
+    access_log          \\var\\log\\nginx\\host.access.log  main;
+    location \\ {
+      root              \\usr\\share\\nginx\\html;
+      index             index.html index.htm;
+    }
+    }
+  }
+  default.conf 就可以访问位于\\usr\\share\\nginx\\html里的静态页面了
+  ```
+  ## 2.简单的文件下载配置
+  ```YMAL
+  server {
+    listen 80;
+    server_name  file.adens.wang;
+    charset utf-8;
+    location \\ {
+      root   \\aria2\\data;
+      autoindex on;
+      autoindex_exact_size on;
+      autoindex_localtime on;
+    }
+  }
+  ```
+  不能配置
+  `index             index.html index.htm;`
+  不然会查找显示index.html,不显示\\aria2\\data目录下的文件.
+  
+  ## 2.Basic 验证
+  
+  1.安装 httpd-tools
+  
+  `yum install httpd-tools ` 
+  
+  2 创建密码
+  在conf.d文件夹下运行命令
+  `htpasswd -cd .passwd aden `
+  
+  3.配置nginx
+  ```
+  server {
+    listen                 80;
+    server_name            file.adens.wang;
+    charset utf-8;
+    location \\ {
+      root                 \\aria2\\data;
+      auth_basic           "please login" #off 会关闭验证 ,string 会显示
+      auth_basic_user_file .passwd        # 生成的具体密码文件地址.地址错误会403
+      autoindex            on;
+      autoindex_exact_size on;
+      autoindex_localtime  on;
+    }
+  }
+  ```
+  htpasswd 参考地址 [htpasswd命令](http:\\\\man.linuxde.net\\htpasswd)
+  nginx auth_basic 参考地址 [Module ngx_http_auth_basic_module](http:\\\\nginx.org\\en\\docs\\http\\ngx_http_auth_basic_module.html)
+  ## 3.HTTPS
+  
+  首先需要一份证书
+  然后再进行nginx配置
+  ```YMAL
+  server {
+      listen                      80;
+      server_name                 dockerhub.adens.cn;
+      listen                      443 ssl http2;
+      ssl_certificate             \\etc\\nginx\\cert\\full_chain.pem;
+      ssl_certificate_key         \\etc\\nginx\\cert\\private.key;
+      ssl_session_timeout         5m;
+      ssl_ciphers                 HIGH:!aNULL:!MD5;
+      ssl_protocols               SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+      ssl_prefer_server_ciphers   on;
+  
+      location \\ {
+           proxy_pass             http:\\\\65.49.205.203:5000;
+    }
+  }
+  
+  ```
+  ## 4.反向代理
+  
+  ```YAML
+  server
+  {
+    listen               80;
+    server_name          alpha.adens.wang;
+    location \\ {
+      proxy_pass         http:\\\\144.34.225.245:3306;
+      proxy_set_header Host  $host;
+    }
+  }
+  server
+  {
+    listen               80;
+    server_name          account.adens.wang;
+    location  \\ {
+      proxy_pass         http:\\\\144.34.225.245:5001;
+      proxy_set_header Host  $host;
+    }
+  }
+  
+  ```
+  
+  ## 5.负载均衡
+  
+  ```YMAL 
+  
+  resolver 10.0.0.1;
+  upstream proxy {
+      #ip_hash
+      server xxx.xxx.xxx.xxx:port weight=2 max_fails=3 fail_timeout=15;
+      server xxx.xxx.xxx.xxx:port weight=3 max_conns=1000;
+      server xxx.xxx.xxx.xxx:port weight=1;
+      server xxx.xxx.xxx.xxx:port backup resolve;
+      server xxx.xxx.xxx.xxx:port down;
+    }
+  server{
+      listen 80;
+      server_name sock.v1.adens.wang;
+      location \\ {
+        proxy_pass http:\\\\proxy;
+      }
+    }
+  
+  ```
+  
+  参考地址[Module ngx_http_upstream_module](http:\\\\nginx.org\\en\\docs\\http\\ngx_http_upstream_module.html#server)
+'''
+linesHighlighted: []
+tags: []
+isStarred: false
+isTrashed: false
